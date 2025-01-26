@@ -1,0 +1,77 @@
+En 2025, plusieurs options sont disponibles pour implémenter l'OCR dans un écosystème Java, avec une attention particulière pour les solutions compatibles avec Spring :
+
+1. Tesseract avec Tess4J : C'est une solution populaire et open-source qui s'intègre bien à Spring Boot[1][2]. Voici les étapes clés :
+   - Ajoutez la dépendance Tess4J à votre projet Maven.
+   - Installez Tesseract OCR sur votre machine.
+   - Créez un service Spring pour gérer le traitement OCR.
+
+2. Adobe PDF Library avec interface Java : Cette solution combine la puissance de la bibliothèque Adobe PDF avec Tesseract pour le traitement OCR des PDF et des images[1].
+
+3. Nanonets OCR API : Bien que ce ne soit pas spécifique à Java, cette API basée sur le machine learning peut être facilement intégrée dans une application Spring Boot pour l'extraction automatisée de données à partir de documents[5].
+
+4. IBM Watson Visual Recognition : Ce service d'IA d'IBM inclut des capacités OCR et peut être intégré à des applications Java complexes[5].
+
+5. EasyOCR : C'est une bibliothèque OCR open-source qui supporte plus de 80 langues et s'intègre bien avec les applications Java[5][9].
+
+## Exemple d'implémentation avec Spring Boot et Tesseract
+
+1. Ajoutez la dépendance Tess4J à votre `pom.xml` :
+
+```xml
+<dependency>
+    <groupId>net.sourceforge.tess4j</groupId>
+    <artifactId>tess4j</artifactId>
+    <version>4.5.5</version>
+</dependency>
+```
+
+2. Créez un service OCR :
+
+```java
+@Service
+public class OCRService {
+    public String extractTextFromImage(MultipartFile file) throws IOException, TesseractException {
+        Tesseract tesseract = new Tesseract();
+        // Configurez le chemin vers votre répertoire tessdata
+        tesseract.setDatapath("/chemin/vers/tessdata");
+        
+        // Traitez l'image et extrayez le texte
+        return tesseract.doOCR(ImageIO.read(file.getInputStream()));
+    }
+}
+```
+
+3. Créez un contrôleur REST pour gérer les téléchargements d'images :
+
+```java
+@RestController
+@RequestMapping("/api/ocr")
+public class OCRController {
+    @Autowired
+    private OCRService ocrService;
+
+    @PostMapping("/extract")
+    public ResponseEntity<String> extractText(@RequestParam("file") MultipartFile file) {
+        try {
+            String extractedText = ocrService.extractTextFromImage(file);
+            return ResponseEntity.ok(extractedText);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de l'extraction du texte");
+        }
+    }
+}
+```
+
+Cette implémentation offre une solution OCR robuste et flexible dans un écosystème Java 25 avec Spring Boot, permettant le traitement d'images et l'extraction de texte via une API REST[2][6].
+
+Citations:
+[1] https://pdfa.org/ocr-with-the-adobe-pdf-library-net-and-java-interface-datalogics-inc/
+[2] https://learnerbits.com/ocr-tesseract-in-spring-boot-2024/
+[3] https://github.com/kapiaszczyk/java_OCR
+[4] https://systemweakness.com/spring-boot-integrates-tess4j-to-implement-ocr-2c42015ccedd?gi=f9cd6360fea7
+[5] https://arya.ai/blog/best-ocr-api
+[6] https://www.baeldung.com/java-ocr-tesseract
+[7] https://www.reddit.com/r/java/comments/21bcl4/best_ocr_optical_character_recognition_library/
+[8] https://stackoverflow.com/questions/1813881/java-ocr-implementation
+[9] https://github.com/kba/awesome-ocr
+[10] https://softwarerecs.stackexchange.com/questions/42655/java-ocr-library
